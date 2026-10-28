@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fbf7ee">
+  <meta name="description" content="«Книга оживает» — интерактивная сказка «Репка» для детей 3–6 лет. Конкурсный демонстрационный прототип.">
+  <title>Книга оживает — интерактивная сказка «Репка»</title>
+  <style>
+    :root { --ink:#283d39; --muted:#688077; --cream:#fbf7ee; --paper:#fffdf7; --sea:#387a69; --sea-dark:#266354; --leaf:#d7e8ca; --peach:#ffe5ce; --orange:#f09b63; --line:#e6e8df; --shadow:0 22px 64px rgba(53,69,53,.12); }
+    * {box-sizing:border-box}
+    body {margin:0;min-height:100vh;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:radial-gradient(ellipse at 5% 0%,#eaf2de 0,transparent 33%),radial-gradient(ellipse at 100% 100%,#ffead7 0,transparent 39%),var(--cream);}
+    button {font:inherit;cursor:pointer}
+    button:focus-visible, a:focus-visible, [tabindex]:focus-visible {outline:4px solid #f39b45;outline-offset:3px}
+    button:disabled {opacity:.52;cursor:default}
+    .shell {width:min(1200px,calc(100% - 40px));margin:0 auto;padding:21px 0 45px}
+    .header {display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:25px}
+    .logo {border:0;background:transparent;display:flex;gap:12px;align-items:center;color:var(--ink);padding:5px;text-align:left}
+    .logo-mark {width:48px;height:48px;background:#ddedcd;display:grid;place-items:center;border-radius:16px;font-size:27px;transform:rotate(-6deg)}
+    .logo-name {display:block;font-family:Georgia,serif;font-weight:700;font-size:22px;line-height:1.04}
+    .logo-caption {display:block;color:var(--muted);font-size:12px;margin-top:4px;letter-spacing:.03em}
+    .top-actions {display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .chip {display:inline-flex;align-items:center;gap:7px;border:1px solid #d7e5d8;border-radius:999px;padding:8px 12px;color:var(--sea-dark);background:#f3f8ee;font-size:13px;font-weight:700}
+    .mini-button {border:1px solid #d6e2d7;background:rgba(255,255,255,.8);color:#375e51;border-radius:12px;padding:10px 13px;font-size:14px;font-weight:700;transition:background .2s}
+    .mini-button:hover {background:#eaf4e8}
+    .screen {display:none;animation:appear .35s ease both}
+    .screen.active {display:block}
+    @keyframes appear {from{opacity:.45;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+    h1,h2,h3,p {margin-top:0}
+    h1,h2 {font-family:Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+    .eyebrow {font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:#6e927a;font-weight:800;margin:0 0 12px}
+    .landing {display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:28px;align-items:stretch}
+    .cover {min-height:560px;border-radius:30px;background:linear-gradient(150deg,#e4efdd,#ffe2b9);box-shadow:var(--shadow);padding:23px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+    .cover .cover-top {display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;gap:12px}
+    .sticker {font-size:12px;background:#fffdf7;border-radius:999px;padding:9px 13px;color:#628274;font-weight:800;box-shadow:0 5px 12px #426a3820}
+    .cover-art {width:100%;flex:1;min-height:280px;display:grid;place-items:center;filter:drop-shadow(0 13px 16px #52694b15)}
+    .cover-art svg {width:100%;max-height:340px}
+    .cover-bottom {text-align:center;position:relative;z-index:1}
+    .cover-bottom h2 {font-size:clamp(44px,6vw,77px);line-height:.98;margin:0 0 8px;color:#3b644f}
+    .cover-bottom p {color:#657c61;margin:0;font-size:15px}
+    .landing-copy {padding:35px 18px 35px 24px;display:flex;flex-direction:column;justify-content:center}
+    .landing-copy h1 {font-size:clamp(40px,4.3vw,63px);line-height:1.05;margin:0 0 19px}
+    .landing-copy .intro {font-size:18px;color:#5c7068;line-height:1.6;max-width:475px}
+    .benefits {display:grid;gap:12px;margin:15px 0 30px}
+    .benefit {display:flex;gap:11px;align-items:center;font-size:15px;color:#476359}
+    .benefit-icon {border-radius:12px;width:36px;height:36px;display:grid;place-items:center;background:#e5eee0;font-size:20px;flex-shrink:0}
+    .cta-row {display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .primary {display:inline-flex;align-items:center;justify-content:center;gap:11px;background:#397b69;color:white;padding:17px 26px;border-radius:17px;border:0;font-size:17px;font-weight:800;box-shadow:0 9px 18px #397b692f;transition:transform .15s,background .15s}
+    .primary:hover {background:#266d59;transform:translateY(-1px)}
+    .secondary {background:#fff;border:1px solid #dce4d8;color:#43685c;border-radius:16px;padding:16px 18px;font-weight:800}
+    .fine {font-size:12px;line-height:1.6;color:#7c8e84;margin-top:18px}
+    .book-grid {display:grid;grid-template-columns:minmax(0,1.36fr) minmax(320px,.64fr);gap:19px;align-items:start}
+    .book-card,.companion-card,.parents-card,.ending-card {background:var(--paper);border:1px solid #edf0e7;border-radius:27px;box-shadow:var(--shadow)}
+    .book-card {overflow:hidden}
+    .book-bar {padding:17px 22px 13px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .book-title {font-family:Georgia,serif;font-size:28px;font-weight:700}
+    .page-count {font-weight:800;color:#72897a;font-size:13px}
+    .progress {height:7px;background:#eaf0e4;overflow:hidden;margin:0 22px 15px;border-radius:999px}
+    .progress-bar {height:100%;width:12.5%;background:linear-gradient(90deg,#7cad81,#e8b67c);border-radius:999px;transition:width .25s}
+    .mobile-prompt {display:none}
+    .storybook-scene {position:relative;margin:0 16px;border-radius:19px;overflow:hidden;background:#eaf4da;min-height:250px}
+    .storybook-scene svg {width:100%;display:block;height:auto;aspect-ratio:900/560}
+    .clickable {cursor:pointer;outline:none}
+    .clickable .highlight {opacity:0;transition:opacity .25s}
+    .clickable:hover .highlight,.clickable:focus-visible .highlight,.clickable.hinted .highlight {opacity:1}
+    .clickable:hover {filter:brightness(1.04)}
+    .scene-helper {position:absolute;bottom:12px;left:13px;background:#fffaf0f0;color:#426c55;border-radius:999px;padding:8px 12px;font-weight:700;font-size:12px;box-shadow:0 3px 11px #1d402423;pointer-events:none}
+    .story-body {padding:16px 24px 22px;display:grid;gap:13px}
+    .story-narrative {font-family:Georgia,serif;font-size:clamp(19px,2.1vw,25px);line-height:1.5;min-height:75px;margin:0}
+    .story-action {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .story-nav {display:flex;gap:10px}
+    .voice-btn {display:inline-flex;align-items:center;gap:8px;background:#eef4e9;color:#456d5a;border:1px solid #dce9d8;padding:11px 13px;border-radius:13px;font-weight:750}
+    .step-btn {background:#397b69;color:white;border:0;padding:13px 18px;border-radius:13px;font-size:15px;font-weight:800}
+    .companion-card {padding:23px;position:relative;overflow:hidden}
+    .companion-card:before {content:'';position:absolute;inset:0 0 auto;height:8px;background:linear-gradient(90deg,#b3dbb1,#ffe2a7)}
+    .agent-head {display:flex;gap:13px;align-items:center;margin:10px 0 15px}
+    .cat-face {width:72px;height:72px;background:radial-gradient(circle at 30% 25%,#fff5da,#e9af83);border-radius:24px;display:grid;place-items:center;font-size:47px;box-shadow:inset 0 -8px 14px #ae725020;flex-shrink:0}
+    .agent-name {font-size:21px;font-family:Georgia,serif;font-weight:700;margin-bottom:4px}
+    .agent-subtitle {font-size:12px;color:#8ca093}
+    .speech {border-radius:17px;background:#f1f7ec;padding:18px;margin-bottom:15px;position:relative;line-height:1.5;color:#36594b;font-size:17px;font-weight:720;min-height:100px}
+    .speech::before {content:'';position:absolute;top:-9px;left:26px;border-width:0 10px 10px;border-color:transparent transparent #f1f7ec;border-style:solid}
+    .prompt-label {font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#8ba087;font-weight:850;margin-bottom:9px}
+    .choice-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .choice {border:2px solid #e2e9db;background:white;padding:11px 7px;min-height:84px;border-radius:15px;color:#465e54;display:flex;gap:4px;align-items:center;justify-content:center;flex-direction:column;font-weight:850;font-size:13px;transition:border-color .15s,background .15s,transform .15s}
+    .choice:hover {background:#f7f9ee;transform:translateY(-1px);border-color:#b1d0b4}
+    .choice .choice-icon {font-size:31px;line-height:1.1}
+    .choice.selected-correct {border-color:#58a07e;background:#ecf7e9}
+    .choice.selected-wrong {border-color:#f5ab8b;background:#fff0e6}
+    .companion-footer {display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid #e9eee4}
+    .hint-btn {color:#39745d;border:1px solid #dbe5d5;background:white;padding:11px 14px;border-radius:12px;font-weight:800}
+    .little-label {font-size:12px;color:#8a9b92}
+    .done-msg {font-size:13px;color:#38775f;font-weight:800;margin-top:10px;min-height:18px}
+    .parent-callout {margin-top:19px;background:#edf1e4;border-radius:17px;padding:16px 19px;display:flex;align-items:center;gap:14px;color:#5a7466;font-size:14px;line-height:1.5}
+    .parent-callout b {color:#305747}
+    .parent-callout .emoji {font-size:27px}
+    .ending-card,.parents-card {padding:clamp(24px,5vw,53px);max-width:850px;margin:24px auto}
+    .ending-card {text-align:center}
+    .ending-emoji {font-size:84px;display:block;margin-bottom:14px}
+    .ending-card h2 {font-size:clamp(35px,5vw,52px);margin:0 0 10px}
+    .ending-card p {font-size:18px;line-height:1.7;color:#66786c;max-width:650px;margin:0 auto 23px}
+    .ending-actions {display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .parents-card h2 {font-size:clamp(32px,4vw,48px)}
+    .parents-card p {line-height:1.7;color:#5d7166;font-size:16px}
+    .metrics {display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+    .metric {background:#f0f6eb;padding:17px;border-radius:15px}
+    .metric .number {display:block;font-size:34px;font-weight:800;color:#417e66}
+    .metric .metric-title {font-size:13px;color:#6d8575}
+    .note-panel {background:#fff3e5;border-radius:17px;padding:18px 21px;margin:20px 0}
+    .note-panel p {margin:0;font-size:14px}
+    .parent-tasks {padding-left:23px;color:#516f60;line-height:1.9}
+    footer {text-align:center;margin:20px 0 0;color:#93a297;font-size:12px}
+    .toast {position:fixed;left:50%;bottom:25px;transform:translate(-50%,15px);background:#355d4e;color:white;padding:12px 18px;border-radius:14px;box-shadow:0 10px 28px #294a3c55;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:5;font-size:13px;text-align:center;max-width:min(90vw,500px)}
+    .toast.visible {opacity:1;transform:translate(-50%,0)}
+    @media(max-width:920px) {.landing{grid-template-columns:1fr}.cover{min-height:410px}.cover-art svg{max-height:250px}.landing-copy{padding:20px 8px}.book-grid{grid-template-columns:1fr}.companion-card{max-width:none}.choice-list{grid-template-columns:repeat(4,1fr)}}
+    @media(max-width:570px) {.mobile-prompt{display:flex;align-items:center;gap:10px;margin:0 9px 11px;padding:12px;background:#edf5e8;border:1px solid #dbe9d7;border-radius:13px;color:#315d4b;font-weight:800;font-size:14px;line-height:1.4}.mobile-prompt span{flex:1}.mobile-prompt button{border:0;background:white;border-radius:10px;padding:8px;min-width:42px;min-height:40px;font-size:18px}.shell{width:calc(100% - 22px);padding-top:10px}.header{margin-bottom:15px}.logo-name{font-size:17px}.logo-caption{font-size:10px}.logo-mark{width:41px;height:41px;font-size:22px}.chip{display:none}.mini-button{font-size:12px;padding:9px}.cover{min-height:385px;padding:13px;border-radius:23px}.cover-bottom h2{font-size:55px}.landing-copy h1{font-size:43px}.landing-copy .intro{font-size:16px}.book-card,.companion-card{border-radius:19px}.book-bar{padding:14px 15px}.book-title{font-size:24px}.storybook-scene{margin:0 9px;min-height:0}.scene-helper{font-size:10px;padding:6px 8px;bottom:6px;left:6px}.progress{margin:0 14px 11px}.story-body{padding:13px 15px 19px}.story-narrative{font-size:20px;min-height:88px}.companion-card{padding:17px}.cat-face{width:57px;height:57px;font-size:38px}.speech{font-size:16px;min-height:auto;padding:14px}.choice-list{grid-template-columns:repeat(2,1fr)}.choice{min-height:75px}.parent-callout{font-size:12px}.metrics{gap:7px}.metric{padding:12px 8px}.metric .number{font-size:27px}.metric .metric-title{font-size:11px}.step-btn{font-size:14px;padding:12px}.voice-btn{font-size:13px;padding:11px}.story-nav{width:100%;justify-content:space-between}.story-action{align-items:stretch}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header class="header">
+    <button class="logo" type="button" id="homeLogo" aria-label="На главную страницу">
+      <span class="logo-mark">📖</span>
+      <span><span class="logo-name">Книга оживает</span><span class="logo-caption">Там, где начинается любовь к чтению</span></span>
+    </button>
+    <nav class="top-actions" aria-label="Навигация">
+      <span class="chip">🌿 Для детей 3–6 лет</span>
+      <button type="button" class="mini-button" id="soundToggle" aria-pressed="true">🔊 Звук включён</button>
+      <button type="button" class="mini-button" id="parentsLink">Родителям</button>
+    </nav>
+  </header>
+  <main>
+    <section id="homeScreen" class="screen active" aria-label="Главная">
+      <div class="landing">
+        <div class="cover" aria-label="Обложка сказки Репка">
+          <div class="cover-top"><span class="sticker">🌼 Первая интерактивная сказка</span><span class="sticker">3–6 лет</span></div>
+          <div id="coverArt" class="cover-art" aria-hidden="true"></div>
+          <div class="cover-bottom"><h2>Репка</h2><p>Русская народная сказка</p></div>
+        </div>
+        <div class="landing-copy">
+          <p class="eyebrow">Демо для международного конкурса</p>
+          <h1>Откроем сказку вместе!</h1>
+          <p class="intro">Посмотри на картинки, послушай историю и помоги героям вытащить большую-пребольшую репку.</p>
+          <div class="benefits">
+            <div class="benefit"><span class="benefit-icon">👆</span> Показывай героев прямо на картинке</div>
+            <div class="benefit"><span class="benefit-icon">🐱</span> Общайся с Котом-Сказочником</div>
+            <div class="benefit"><span class="benefit-icon">💚</span> Запоминай, фантазируй и помогай</div>
+          </div>
+          <div class="cta-row"><button type="button" class="primary" id="startButton">Открыть сказку <span aria-hidden="true">→</span></button><button type="button" class="secondary" id="homeParent">Для родителей</button></div>
+          <div class="fine">Одна сказка · 8 страниц · примерно 5–7 минут · без регистрации и рекламы</div>
+        </div>
+      </div>
+      <div class="parent-callout"><span class="emoji">💛</span><span><b>Дорогие родители!</b> Лучше всего знакомиться со сказкой вместе. Наша цель — заинтересовать ребёнка книгой, а не увеличить время перед экраном.</span></div>
+    </section>
+    <section id="bookScreen" class="screen" aria-label="Интерактивная сказка">
+      <div class="book-grid">
+        <article class="book-card">
+          <div class="book-bar"><div class="book-title">🌱 Репка</div><div class="page-count" id="pageCount">Страница 1 из 8</div></div>
+          <div class="progress" aria-label="Прогресс чтения"><div class="progress-bar" id="progressBar"></div></div>
+          <div class="mobile-prompt"><span id="mobilePromptText">Откроем сказку!</span><button id="mobilePromptSpeak" type="button" aria-label="Прослушать вопрос">🔊</button></div>
+          <div class="storybook-scene" id="scene" aria-label="Иллюстрация. Нажимайте на персонажей, чтобы ответить на вопрос."></div>
+          <div class="story-body">
+            <p class="story-narrative" id="storyText"></p>
+            <div class="story-action">
+              <button class="voice-btn" id="repeatButton" type="button">🔊 Послушать ещё раз</button>
+              <div class="story-nav"><button class="mini-button" type="button" id="backButton">← Назад</button><button class="step-btn" type="button" id="nextButton">Дальше →</button></div>
+            </div>
+          </div>
+        </article>
+        <aside class="companion-card" aria-label="Кот-Сказочник">
+          <div class="agent-head"><div class="cat-face" role="img" aria-label="Кот-Сказочник">🐱</div><div><div class="agent-name">Кот-Сказочник</div><div class="agent-subtitle">Твой добрый помощник</div></div></div>
+          <p class="prompt-label">Задание для тебя</p>
+          <div class="speech" id="agentSpeech" role="status" aria-live="polite"></div>
+          <p class="prompt-label" id="choiceLabel">Можно нажать на героя на рисунке</p>
+          <div id="choices" class="choice-list"></div>
+          <div class="done-msg" id="doneMsg" role="status"></div>
+          <div class="companion-footer"><button class="hint-btn" id="hintButton" type="button">✨ Подскажи мне</button><span class="little-label">Можно ошибаться — это не страшно</span></div>
+        </aside>
+      </div>
+      <div class="parent-callout"><span class="emoji">📚</span><span>Не спешите перелистывать: предложите ребёнку самому рассмотреть иллюстрацию и придумать, что будет дальше.</span></div>
+    </section>
+    <section id="endScreen" class="screen" aria-label="Сказка завершена">
+      <div class="ending-card"><span class="ending-emoji">🌼📖</span><p class="eyebrow">Сказка закончилась — любовь к книгам только начинается</p><h2>Ура! Мы помогли героям!</h2><p>Большую репку удалось вытащить, потому что все действовали вместе. А теперь расскажи маме или папе, кто помогал дедушке и почему даже маленькая мышка оказалась важной!</p><div class="ending-actions"><button class="primary" id="againButton" type="button">🔄 Прочитать снова</button><button class="secondary" id="endParent" type="button">👨‍👩‍👧 Родителям: итоги</button></div></div>
+    </section>
+    <section id="parentsScreen" class="screen" aria-label="Информация для родителей">
+      <div class="parents-card"><p class="eyebrow">Взрослым о проекте</p><h2>Маленькая сказка — большой первый шаг</h2><p><b>«Книга оживает»</b> помогает ребёнку 3–6 лет научиться внимательнее слушать истории, узнавать персонажей, запоминать последовательность событий и обсуждать поступки героев. Книга остаётся главным героем занятия, а технология лишь помогает её открыть.</p>
+        <h3>Наше маленькое путешествие</h3><div class="metrics"><div class="metric"><span class="number" id="metricPages">0/8</span><span class="metric-title">Страниц просмотрено</span></div><div class="metric"><span class="number" id="metricTasks">0/8</span><span class="metric-title">Заданий выполнено</span></div><div class="metric"><span class="number" id="metricHints">0</span><span class="metric-title">Подсказок получено</span></div></div>
+        <h3>Продолжите историю без экрана</h3><ol class="parent-tasks"><li>Попросите ребёнка вспомнить, кто помогал дедушке и в каком порядке.</li><li>Спросите: «Как ты думаешь, почему даже маленькая мышка смогла помочь?»</li><li>Покажите бумажную книгу со сказкой «Репка» и предложите вместе её перелистнуть.</li></ol>
+        <div class="note-panel"><p><b>О демонстрационной версии.</b> Это работающий прототип взаимодействия с книгой. Поведение помощника сейчас реализовано сценарными правилами с адаптивными подсказками. Внешняя языковая модель и распознавание детской речи пока не подключены. Приложение не требует регистрации, не собирает имена, фотографии и голоса детей и не отправляет данные на сервер. Озвучивание зависит от возможностей браузера и системных голосов устройства.</p></div>
+        <div class="cta-row"><button type="button" class="primary" id="parentBack">← Вернуться к сказке</button><button type="button" class="secondary" id="parentHome">На главную</button></div>
+      </div>
+    </section>
+  </main>
+  <footer>«Книга оживает» · конкурсный демонстрационный прототип · 2026</footer>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+(()=>{
+  'use strict';
+  const pages = [
+    {title:'Посадил дед репку', text:'Посадил дед репку. Поливал её, солнышко грело землю. И начала репка расти!', question:'Посмотри на картинку. Где растёт репка? Нажми на неё!', target:'turnip', options:['turnip','grandpa'], hint:'Она большая, жёлтая, с зелёными листочками. Ищи в огороде!', success:'Вот она, репка! Молодец, ты очень внимательный!', visible:['grandpa','turnip']},
+    {title:'Выросла репка', text:'Выросла репка большая-пребольшая! Пришёл дед, тянет-потянет, а вытянуть не может.', question:'Кто посадил репку и теперь пытается её вытащить?', target:'grandpa', options:['grandpa','grandma','turnip'], hint:'Посмотри на человека с бородой и в шляпе. Это дедушка.', success:'Да, это дедушка! Одному ему непросто справиться.', visible:['grandpa','grandma','turnip']},
+    {title:'Позвал дед бабку', text:'Позвал дед бабку. Бабка за дедку, дедка за репку. Тянут-потянут, вытянуть не могут.', question:'Покажи, кто первым пришёл на помощь дедушке?', target:'grandma', options:['grandma','girl','grandpa'], hint:'Она в красивом платочке и стоит рядом с дедушкой.', success:'Правильно, бабушка! Вместе уже легче!', visible:['grandpa','grandma','girl','turnip']},
+    {title:'Прибежала внучка', text:'Позвала бабка внучку. Внучка за бабку, бабка за дедку, дедка за репку. А репка всё не выходит!', question:'Найди внучку! Кто теперь помогает бабушке и дедушке?', target:'girl', options:['girl','grandma','dog'], hint:'Внучка маленькая, с бантиком на голове.', success:'Верно! Внучка тоже помогает!', visible:['grandpa','grandma','girl','dog','turnip']},
+    {title:'Прискакала Жучка', text:'Позвала внучка собаку Жучку. Жучка за внучку, внучка за бабку, бабка за дедку. Тянут-потянут!', question:'А где собака Жучка? Покажи её на рисунке!', target:'dog', options:['dog','cat','mouse'], hint:'У Жучки длинные ушки и хвостик. Она говорит: «Гав-гав!»', success:'Гав-гав! Жучка очень рада, что ты её нашёл!', visible:['grandpa','grandma','girl','dog','cat','mouse','turnip']},
+    {title:'Пришла кошка', text:'Позвала Жучка кошку. Кошка за Жучку, Жучка за внучку, внучка за бабку, бабка за дедку. Тянут-потянут!', question:'Кошка тоже хочет помочь! Где она спряталась?', target:'cat', options:['cat','dog','mouse'], hint:'Кошка мурлычет «мяу» и у неё острые ушки.', success:'Мур-мур! Кошка нашлась. Но репка всё ещё крепко сидит!', visible:['grandpa','grandma','girl','dog','cat','mouse','turnip']},
+    {title:'Маленькая мышка', text:'Позвала кошка мышку. Прибежала маленькая мышка и тоже ухватилась за друзей!', question:'Кто самый маленький среди помощников? Найди мышку!', target:'mouse', options:['mouse','cat','dog'], hint:'Она самая маленькая, серенькая, с круглыми ушками.', success:'Да, мышка! Даже маленький помощник очень важен.', visible:['grandpa','grandma','girl','dog','cat','mouse','turnip']},
+    {title:'Вместе получилось!', text:'Потянули все дружно: раз, два, три! И вытащили репку! Как хорошо, когда друзья помогают друг другу.', question:'Как ты думаешь, почему удалось вытащить репку?', target:'together', options:['together','alone'], hint:'Подумай: смог ли дедушка справиться совсем один?', success:'Правильно! Когда помогают друг другу, даже трудное дело становится легче!', visible:['grandpa','grandma','girl','dog','cat','mouse','turnip'], pulled:true}
+  ];
+  const names={grandpa:'Дедушка',grandma:'Бабушка',girl:'Внучка',dog:'Жучка',cat:'Кошка',mouse:'Мышка',turnip:'Репка',together:'Все помогали',alone:'Дедушка один'};
+  const icons={grandpa:'👴',grandma:'👵',girl:'👧',dog:'🐕',cat:'🐈',mouse:'🐭',turnip:'🌱',together:'🤝',alone:'👴'};
+  const state={page:0,visited:new Set(),completed:new Set(),attempts:{},hints:new Set(),mute:false,parentFrom:'homeScreen',chosen:''};
+  const $=id=>document.getElementById(id);
+  const screens=['homeScreen','bookScreen','endScreen','parentsScreen'];
+  function show(id){screens.forEach(x=>$(x).classList.toggle('active',x===id));window.scrollTo({top:0,behavior:'instant'});}
+  function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),3500);}
+  function speak(text){if(state.mute)return;if(!('speechSynthesis' in window)){toast('Озвучивание недоступно в этом браузере. Весь текст виден на экране.');return;}try{window.speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(text);u.lang='ru-RU';u.rate=.86;u.pitch=1.07;u.volume=.95;let voices=window.speechSynthesis.getVoices();let ru=voices.find(v=>/^ru[-_]/i.test(v.lang));if(ru)u.voice=ru;window.speechSynthesis.speak(u)}catch(e){toast('Голос недоступен, но сказку можно читать на экране.')}}
+  function stopVoice(){if('speechSynthesis' in window)window.speechSynthesis.cancel()}
+  const shape={
+    grandpa:`<ellipse cx="0" cy="0" rx="37" ry="8" fill="#53694e" opacity=".18"/><path d="M-23-57 L-20-5 L-5-5 L0-56 Z" fill="#5d6d8b"/><path d="M5-57 L8-5 L22-5 L20-58Z" fill="#4f607d"/><path d="M-37-100 Q-17-116 0-115 Q24-117 37-100 L32-51 L-33-51Z" fill="#83a879" stroke="#527759" stroke-width="3"/><path d="M-27-91 Q-46-74-49-54" stroke="#dcae8c" stroke-width="12" stroke-linecap="round"/><path d="M29-91 Q44-78 51-61" stroke="#dcae8c" stroke-width="12" stroke-linecap="round"/><circle cy="-139" r="30" fill="#f0c6a1"/><path d="M-26-147 Q-26-172 -1-169 Q25-169 28-146" fill="#f4f3eb"/><path d="M-18-127 Q-12-106 2-106 Q18-111 20-128" fill="#f6f0e4"/><path d="M-38-162 Q-10-191 29-168 L37-153 L-40-153Z" fill="#8b6d57"/><ellipse cy="-153" rx="44" ry="7" fill="#80624c"/><circle cx="-10" cy="-139" r="2.5" fill="#53483f"/><circle cx="12" cy="-139" r="2.5" fill="#53483f"/><path d="M-7-125 Q1-118 10-124" stroke="#8b6755" stroke-width="2" fill="none"/>`,
+    grandma:`<ellipse cy="0" rx="36" ry="8" fill="#53694e" opacity=".18"/><path d="M-34-108 Q-3-121 30-108 L46-11 Q0 5-44-11Z" fill="#e39c88" stroke="#b77e73" stroke-width="3"/><path d="M-28-105 Q-52-83-48-62" fill="none" stroke="#e9b897" stroke-width="12" stroke-linecap="round"/><path d="M29-105 Q49-83 48-64" fill="none" stroke="#e9b897" stroke-width="12" stroke-linecap="round"/><circle cy="-141" r="29" fill="#efc5a3"/><path d="M-30-147 Q-29-185 0-178 Q29-185 30-146 L21-118 Q2-126-22-119Z" fill="#f9e4a5" stroke="#c8a571" stroke-width="2"/><circle cx="-10" cy="-142" r="2.5" fill="#53483f"/><circle cx="11" cy="-142" r="2.5" fill="#53483f"/><path d="M-8-129 Q0-122 9-129" stroke="#9a6151" fill="none" stroke-width="2"/><path d="M-16-107 L0-81 L17-108" fill="#f8eee4"/>`,
+    girl:`<ellipse cy="0" rx="33" ry="7" fill="#53694e" opacity=".18"/><path d="M-14-48 L-13-7 M12-48 L12-7" stroke="#f0be98" stroke-width="12" stroke-linecap="round"/><path d="M-25-88 L-36-40 Q0-23 36-40 L24-88Z" fill="#e5b25b" stroke="#bc8a43" stroke-width="3"/><path d="M-19-83 Q-34-70-38-56 M19-83 Q34-70 39-56" stroke="#e8b695" stroke-width="10" stroke-linecap="round"/><circle cy="-116" r="24" fill="#f1c49e"/><path d="M-25-122 Q-29-150 2-146 Q26-143 26-120 L20-104 L16-130 Q-4-121-23-129Z" fill="#826246"/><path d="M-25-121 Q-48-118-33-93" stroke="#826246" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M25-121 Q48-118 34-93" stroke="#826246" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M-43-102 L-28-106 L-40-122Z M28-106 L42-101 L41-124Z" fill="#d88478"/><circle cx="-8" cy="-114" r="2" fill="#4e3c36"/><circle cx="9" cy="-114" r="2" fill="#4e3c36"/><path d="M-5-105 Q0-101 6-105" fill="none" stroke="#ad715b" stroke-width="2"/>`,
+    dog:`<ellipse cy="0" rx="35" ry="6" fill="#53694e" opacity=".17"/><ellipse cy="-44" rx="36" ry="30" fill="#c4875f"/><path d="M27-53 Q58-88 63-55" stroke="#b97d57" stroke-width="14" fill="none" stroke-linecap="round"/><path d="M-21-29 L-22-3 M20-27 L21-3" stroke="#9b654c" stroke-width="11" stroke-linecap="round"/><circle cx="-17" cy="-79" r="27" fill="#ce956b"/><path d="M-32-90 Q-58-111-48-71 Q-38-66-29-78Z" fill="#86553b"/><path d="M-5-95 Q12-114 14-80 L-1-78Z" fill="#86553b"/><ellipse cx="-18" cy="-66" rx="13" ry="11" fill="#f0d4b2"/><circle cx="-25" cy="-86" r="3" fill="#46392f"/><circle cx="-8" cy="-84" r="3" fill="#46392f"/><circle cx="-21" cy="-69" r="4" fill="#4f3b34"/><path d="M-19-65 Q-12-58-8-65" stroke="#82503b" stroke-width="2" fill="none"/>`,
+    cat:`<ellipse cy="0" rx="28" ry="6" fill="#53694e" opacity=".18"/><path d="M18-39 Q48-57 39-82" stroke="#b17550" stroke-width="13" fill="none" stroke-linecap="round"/><ellipse cy="-33" rx="25" ry="30" fill="#e2a06d"/><path d="M-29-85 L-24-123 L-1-100 L20-123 L27-86Z" fill="#e4a36e"/><circle cy="-87" r="27" fill="#e4a36e"/><path d="M-22-102 L-20-113 L-10-104 M11-104 L19-114 L23-102" fill="#f3c5aa"/><circle cx="-10" cy="-88" r="3" fill="#4d503b"/><circle cx="11" cy="-88" r="3" fill="#4d503b"/><path d="M-4-76 L4-76 L0-71Z" fill="#a65f54"/><path d="M-10-70 L-29-73 M10-70 L29-73 M-10-66 L-29-65 M10-66 L29-65" stroke="#88694f" stroke-width="2"/><path d="M-11-14 L-11-3 M11-14 L11-3" stroke="#cb8d60" stroke-width="10" stroke-linecap="round"/>`,
+    mouse:`<ellipse cy="0" rx="26" ry="5" fill="#53694e" opacity=".16"/><path d="M20-17 Q68-3 64-26" stroke="#b28c8e" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cy="-17" rx="23" ry="19" fill="#9e9fa6"/><circle cx="-15" cy="-43" r="18" fill="#aeb0b5"/><circle cx="-28" cy="-58" r="13" fill="#aeb0b5"/><circle cx="-5" cy="-61" r="13" fill="#aeb0b5"/><circle cx="-28" cy="-58" r="7" fill="#e8b4ad"/><circle cx="-5" cy="-61" r="7" fill="#e8b4ad"/><circle cx="-20" cy="-45" r="2.5" fill="#39403e"/><circle cx="-7" cy="-45" r="2.5" fill="#39403e"/><circle cx="-15" cy="-36" r="4" fill="#d18c95"/><path d="M-15-34 L-30-30 M-15-34 L0-30" stroke="#8e7981" stroke-width="1.5"/>`
+  };
+  function objectSVG(id,x,y,s=1,extra=''){
+    let body=shape[id];let isTurnip=id==='turnip';if(isTurnip){body=`<ellipse cx="0" cy="-6" rx="78" ry="14" fill="#566c4a" opacity=".16"/><path d="M0-26 Q-95-49-75-143 Q-52-209 4-196 Q87-199 84-133 Q81-75 32-38 L0-10 L-31-39Z" fill="#f4c66f" stroke="#d0a151" stroke-width="5"/><path d="M0-33 Q-45-102-55-145" fill="none" stroke="#e8ad55" stroke-width="5" opacity=".4"/><path d="M-7-187 Q-60-234-40-275 Q-2-263 12-195Z" fill="#79a668"/><path d="M0-193 Q14-271 61-270 Q67-232 13-189Z" fill="#65965d"/><path d="M6-190 Q-1-249 25-280 Q48-251 27-187Z" fill="#92b970"/><path d="M-14-178 Q-56-212-90-202 Q-80-162-18-169Z" fill="#79ab65"/><ellipse cx="8" cy="-141" rx="29" ry="17" fill="#ffdd97" opacity=".4"/>`}
+    let box=isTurnip?`<rect class="highlight" x="-101" y="-286" width="204" height="291" rx="38" fill="none" stroke="#fff4b8" stroke-width="12" stroke-dasharray="14 10"/>`:`<rect class="highlight" x="-57" y="-203" width="114" height="213" rx="45" fill="none" stroke="#fff4b8" stroke-width="11" stroke-dasharray="12 9"/>`;
+    return `<g class="clickable" data-choice="${id}" tabindex="0" role="button" aria-label="${names[id]}" transform="translate(${x} ${y}) scale(${s})" ${extra}>${box}${body}<rect x="${isTurnip?-105:-54}" y="${isTurnip?-290:-205}" width="${isTurnip?210:108}" height="${isTurnip?305:220}" fill="transparent"/></g>`;
+  }
+  function sceneSVG(idx,decorative=false){
+    const page=pages[idx]||pages[0],others=page.visible.filter(x=>x!=='turnip');
+    const placements={
+      0:{grandpa:[265,457,1],turnip:[675,463,.91]},
+      1:{grandpa:[346,460,1.02],grandma:[154,460,.88],turnip:[678,460,1.03]},
+      2:{grandpa:[420,463,1],grandma:[273,462,.94],girl:[128,465,.82],turnip:[708,462,1.02]},
+      3:{grandpa:[473,462,.97],grandma:[353,462,.87],girl:[232,468,.83],dog:[117,468,.73],turnip:[734,464,.92]},
+      4:{grandpa:[504,463,.88],grandma:[405,463,.80],girl:[309,470,.79],dog:[194,473,.8],cat:[100,473,.64],mouse:[66,493,.55],turnip:[743,465,.85]},
+      5:{grandpa:[529,461,.81],grandma:[437,467,.75],girl:[346,474,.71],dog:[240,472,.77],cat:[151,476,.68],mouse:[75,486,.57],turnip:[747,466,.83]},
+      6:{grandpa:[543,462,.78],grandma:[452,466,.73],girl:[360,471,.72],dog:[258,474,.74],cat:[166,473,.68],mouse:[82,482,.58],turnip:[748,464,.82]},
+      7:{grandpa:[546,464,.78],grandma:[454,467,.73],girl:[363,472,.72],dog:[261,477,.72],cat:[168,476,.65],mouse:[90,486,.6],turnip:[746,420,.84]}
+    };let pos=placements[idx]||placements[0];
+    const people=others.map(name=>{let [x,y,s]=pos[name]||[100,450,.7];return objectSVG(name,x,y,s)}).join('');
+    const turnip=objectSVG('turnip',...pos.turnip);
+    const mark=decorative?'':`<title>Страница ${idx+1}. ${page.title}</title>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Иллюстрация к сказке: ${page.title}" preserveAspectRatio="xMidYMid meet">
+      ${mark}<defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#cee7e6"/><stop offset="1" stop-color="#fef0c8"/></linearGradient><linearGradient id="ground" x2="0" y2="1"><stop stop-color="#a8ca8a"/><stop offset="1" stop-color="#6f9f6f"/></linearGradient><pattern id="spots" width="57" height="57" patternUnits="userSpaceOnUse"><circle r="2" cx="10" cy="20" fill="#f0efbf" opacity=".5"/></pattern></defs>
+      <rect width="900" height="560" fill="url(#sky)"/><circle cx="754" cy="94" r="57" fill="#fff5c7" opacity=".93"/>
+      <g fill="#fffdf0" opacity=".78"><ellipse cx="148" cy="113" rx="75" ry="24"/><ellipse cx="195" cy="112" rx="50" ry="32"/><ellipse cx="500" cy="82" rx="83" ry="23"/><ellipse cx="555" cy="85" rx="42" ry="29"/></g>
+      <path d="M0 344 Q190 270 360 331 Q600 250 900 322 L900 560 L0 560Z" fill="#b5cf9b"/><path d="M0 388 Q175 326 365 380 Q604 319 900 385 L900 560 L0 560Z" fill="url(#ground)"/>
+      <path d="M0 468 Q400 416 900 466 L900 560 L0 560Z" fill="#79a36f" opacity=".65"/><rect y="399" width="900" height="161" fill="url(#spots)" opacity=".5"/>
+      <g transform="translate(57 303)" opacity=".8"><path d="M0 55 L0-22 L75-75 L144-22 L144 55Z" fill="#f4d5a0"/><path d="M-9-22 L75-91 L152-22" fill="none" stroke="#ba826c" stroke-width="21" stroke-linejoin="round"/><rect x="58" y="-17" width="36" height="70" fill="#94aba3"/><rect x="15" y="0" width="29" height="25" fill="#d4edf1"/><rect x="108" y="0" width="23" height="25" fill="#d4edf1"/></g>
+      <g fill="#8bac77" opacity=".8"><ellipse cx="895" cy="387" rx="95" ry="25"/><ellipse cx="16" cy="400" rx="77" ry="19"/></g>
+      <g stroke="#5b9c63" stroke-width="4" stroke-linecap="round"><path d="M55 493 l-8-15 M56 493 l9-17 M67 497 l8-12 M851 482 l-11-19 M851 482 l10-20 M820 499 l11-17"/></g>
+      <g fill="#f7e8b2"><circle cx="48" cy="477" r="7"/><circle cx="866" cy="462" r="7"/><circle cx="830" cy="492" r="6"/></g>
+      <path d="M600 455 Q741 404 883 468" fill="none" stroke="#86654d" stroke-width="8" stroke-linecap="round" opacity=".22"/>
+      ${page.pulled?`<path d="M705 474 L800 476" fill="none" stroke="#8a623b" stroke-width="7" stroke-linecap="round"/>`:''}
+      ${turnip}${people}
+      <g opacity=".65"><path d="M845 259 Q859 245 871 259 Q859 268 845 259" fill="#f1ac80"/><circle cx="860" cy="258" r="3" fill="#b86d58"/><path d="M424 197 Q435 184 449 200 Q435 207 424 197" fill="#e8b785"/></g>
+    </svg>`;
+  }
+  function renderChoices(page){const list=$('choices');list.innerHTML='';const finished=state.completed.has(state.page);page.options.forEach(id=>{let btn=document.createElement('button');btn.type='button';btn.className='choice'+(finished&&id===page.target?' selected-correct':'')+(state.chosen===id&&id!==page.target?' selected-wrong':'');btn.innerHTML=`<span class="choice-icon" aria-hidden="true">${icons[id]}</span><span>${names[id]}</span>`;btn.setAttribute('aria-label',names[id]);btn.addEventListener('click',()=>choose(id));list.append(btn)});$('choiceLabel').textContent=page.target==='together'?'Выбери ответ:':'Можно нажать на героя на рисунке или на картинку ниже';$('doneMsg').textContent=finished?'✓ Задание выполнено! Можно листать дальше.':'';}
+  function renderPage(withVoice=true){let p=pages[state.page];state.visited.add(state.page);$('pageCount').textContent=`Страница ${state.page+1} из ${pages.length}`;$('progressBar').style.width=`${(state.page+1)*100/pages.length}%`;$('storyText').textContent=p.text;$('mobilePromptText').textContent=p.question;$('agentSpeech').textContent=state.completed.has(state.page)?p.success:p.question;$('scene').innerHTML=sceneSVG(state.page)+`<div class="scene-helper">👆 Нажми на героя</div>`;$('scene').querySelectorAll('[data-choice]').forEach(el=>{el.addEventListener('click',()=>choose(el.dataset.choice));el.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();choose(el.dataset.choice)}})});state.chosen='';renderChoices(p);$('backButton').disabled=state.page===0;$('nextButton').textContent=state.page===pages.length-1?'Закончить сказку ✓':'Дальше →';$('hintButton').disabled=state.completed.has(state.page);if(state.hints.has(state.page))highlightTarget();if(withVoice)speak(p.text+' '+(state.completed.has(state.page)?'':p.question));}
+  function highlightTarget(){let t=pages[state.page].target;const node=[...$('scene').querySelectorAll('[data-choice]')].find(e=>e.dataset.choice===t);if(node)node.classList.add('hinted')}
+  function choose(id){const p=pages[state.page];if(state.completed.has(state.page))return;state.chosen=id;state.attempts[state.page]=(state.attempts[state.page]||0)+1;if(id===p.target){state.completed.add(state.page);$('agentSpeech').textContent=p.success;$('mobilePromptText').textContent='Молодец! Можно листать дальше.';speak(p.success);$('hintButton').disabled=true;renderChoices(p);$('doneMsg').textContent='✓ Задание выполнено! Можно листать дальше.';const el=[...$('scene').querySelectorAll('[data-choice]')].find(x=>x.dataset.choice===id);if(el)el.classList.add('hinted');}else{let line=(state.attempts[state.page]>=2)?'Ничего страшного! '+p.hint:'Хорошая попытка! Давай посмотрим ещё внимательнее. '+p.question;$('agentSpeech').textContent=line;$('mobilePromptText').textContent=line;speak(line);renderChoices(p);if(state.attempts[state.page]>=2){state.hints.add(state.page);highlightTarget();}}}
+  function hint(){const p=pages[state.page];if(state.completed.has(state.page))return;state.hints.add(state.page);highlightTarget();$('agentSpeech').textContent=p.hint;$('mobilePromptText').textContent=p.hint;speak(p.hint)}
+  function start(reset=false){if(reset){state.page=0;state.visited.clear();state.completed.clear();state.hints.clear();state.attempts={};}show('bookScreen');renderPage(true)}
+  function openParents(from){state.parentFrom=from||'homeScreen';stopVoice();$('metricPages').textContent=`${state.visited.size}/${pages.length}`;$('metricTasks').textContent=`${state.completed.size}/${pages.length}`;$('metricHints').textContent=state.hints.size;show('parentsScreen')}
+  function toHome(){stopVoice();show('homeScreen')}
+  $('coverArt').innerHTML=sceneSVG(6,true);
+  $('startButton').addEventListener('click',()=>start(true));
+  $('againButton').addEventListener('click',()=>start(true));
+  $('nextButton').addEventListener('click',()=>{if(state.page>=pages.length-1){stopVoice();show('endScreen')}else{state.page++;renderPage(true)}});
+  $('backButton').addEventListener('click',()=>{if(state.page>0){state.page--;renderPage(true)}});
+  $('repeatButton').addEventListener('click',()=>{let p=pages[state.page];speak(p.text+' '+p.question)});
+  $('hintButton').addEventListener('click',hint);
+  $('mobilePromptSpeak').addEventListener('click',()=>speak(pages[state.page].question));
+  $('soundToggle').addEventListener('click',()=>{state.mute=!state.mute;$('soundToggle').textContent=state.mute?'🔇 Звук выключен':'🔊 Звук включён';$('soundToggle').setAttribute('aria-pressed',String(!state.mute));if(state.mute)stopVoice();else toast('Нажмите «Послушать ещё раз», чтобы озвучить страницу.')});
+  $('parentsLink').addEventListener('click',()=>openParents(document.querySelector('.screen.active').id));
+  $('homeParent').addEventListener('click',()=>openParents('homeScreen'));
+  $('endParent').addEventListener('click',()=>openParents('endScreen'));
+  $('parentBack').addEventListener('click',()=>{show(state.parentFrom==='parentsScreen'?'homeScreen':state.parentFrom);if(state.parentFrom==='bookScreen')renderPage(false)});
+  $('parentHome').addEventListener('click',toHome);
+  $('homeLogo').addEventListener('click',toHome);
+  if('speechSynthesis' in window){window.speechSynthesis.getVoices()}else{$('soundToggle').textContent='🔇 Нет голосов'}
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)stopVoice()});
+})();
+</script>
+</body>
+</html>
